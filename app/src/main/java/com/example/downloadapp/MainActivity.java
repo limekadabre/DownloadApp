@@ -58,20 +58,19 @@ public class MainActivity extends AppCompatActivity {
         download.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 String[] permission = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
                         String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
                         requestPermissions(permissions, PERMISSION_STORAGE_CODE);
                     } else {
-                        for (int i=0;i<urls.length;i++){
-                            startDownloading(urls[i]);
-                        }
+                        AsyncDownload downloadPdfs = new AsyncDownload();
+                        downloadPdfs.execute(urls);
                     }
                 } else {
-                    for (int i=0;i<urls.length;i++){
-                        startDownloading(urls[i]);
-                    }
+                    AsyncDownload downloadPdfs = new AsyncDownload();
+                    downloadPdfs.execute(urls);
                 }
 
 
@@ -81,36 +80,34 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-
-    public void startDownloading(String url) {
-        //created download request
-        DownloadManager.Request request=new DownloadManager.Request(Uri.parse(url));
-
-        // Allow all network types to download files
-        request.setAllowedNetworkTypes((DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE));
-//        String fileName = FilenameUtils.getName(url.getPath());
-        String filename=URLUtil.guessFileName(url, null, null);
-        request.setTitle(filename);  //set title in download notification
-        request.setDescription("Downloading file");
-
-        request.allowScanningByMediaScanner();
-        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, ""+System.currentTimeMillis());
-         //get download service and enqueue file
-        DownloadManager manager=(DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
-        manager.enqueue(request);
-
-    }
+//
+//    public void startDownloading(String url) {
+//        //created download request
+//        DownloadManager.Request request=new DownloadManager.Request(Uri.parse(url));
+//
+//        // Allow all network types to download files
+//        request.setAllowedNetworkTypes((DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE));
+////        String fileName = FilenameUtils.getName(url.getPath());
+//        String filename=URLUtil.guessFileName(url, null, null);
+//        request.setTitle(filename);  //set title in download notification
+//        request.setDescription("Downloading file");
+//
+//        request.allowScanningByMediaScanner();
+//        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+//        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, ""+System.currentTimeMillis());
+//         //get download service and enqueue file
+//        DownloadManager manager=(DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+//        manager.enqueue(request);
+//
+//    }
 
 
     public  void onRequestPermissionResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch(requestCode){
             case PERMISSION_STORAGE_CODE:{
                 if(grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED){
-                    for (int i=0;i<urls.length;i++){
-                        startDownloading(urls[i]);
-
-                    }
+                    AsyncDownload downloadPdfs = new AsyncDownload();
+                    downloadPdfs.execute(urls);
                 }
                 else {
                     Toast.makeText(this , "Permission denied", Toast.LENGTH_SHORT).show();
